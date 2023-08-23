@@ -19,7 +19,7 @@ public class Parser : Nand2TetrisParser
         do
         {
             ParseCommand(_source?.ReadLine() ?? "// bad line or no source");
-        } while (CommandType() is VMTranslator.Translator.CommandType.SKIPPABLE);
+        } while (_commandType is CommandType.SKIPPABLE );
     }
 
     private void ParseCommand(string line)
@@ -33,17 +33,17 @@ public class Parser : Nand2TetrisParser
 
         switch (_commandType)
         {
-            case VMTranslator.Translator.CommandType.SKIPPABLE:
+            case CommandType.SKIPPABLE:
             {
                 break;
             }
-            case VMTranslator.Translator.CommandType.C_ARITHMETIC:
+            case CommandType.C_ARITHMETIC:
             {
                 _arg1 = commandParsed[0];
                 break;
             }
-            case VMTranslator.Translator.CommandType.C_PUSH:
-            case VMTranslator.Translator.CommandType.C_POP:
+            case CommandType.C_PUSH:
+            case CommandType.C_POP:
             default:
             {
                 _arg1 = commandParsed[1];
@@ -57,18 +57,18 @@ public class Parser : Nand2TetrisParser
     {
         var commandTypes = new Dictionary<string, CommandType>()
         {
-            { "push", VMTranslator.Translator.CommandType.C_PUSH },
-            { "pop", VMTranslator.Translator.CommandType.C_POP },
-            { "add", VMTranslator.Translator.CommandType.C_ARITHMETIC },
-            { "sub", VMTranslator.Translator.CommandType.C_ARITHMETIC },
-            { "neg", VMTranslator.Translator.CommandType.C_ARITHMETIC },
-            { "eq", VMTranslator.Translator.CommandType.C_ARITHMETIC },
-            { "gt", VMTranslator.Translator.CommandType.C_ARITHMETIC },
-            { "lt", VMTranslator.Translator.CommandType.C_ARITHMETIC },
-            { "and", VMTranslator.Translator.CommandType.C_ARITHMETIC },
-            { "or", VMTranslator.Translator.CommandType.C_ARITHMETIC },
-            { "not", VMTranslator.Translator.CommandType.C_ARITHMETIC },
-            { "skippable", VMTranslator.Translator.CommandType.SKIPPABLE },
+            { "push", CommandType.C_PUSH },
+            { "pop", CommandType.C_POP },
+            { "add", CommandType.C_ARITHMETIC },
+            { "sub", CommandType.C_ARITHMETIC },
+            { "neg", CommandType.C_ARITHMETIC },
+            { "eq", CommandType.C_ARITHMETIC },
+            { "gt", CommandType.C_ARITHMETIC },
+            { "lt", CommandType.C_ARITHMETIC },
+            { "and", CommandType.C_ARITHMETIC },
+            { "or", CommandType.C_ARITHMETIC },
+            { "not", CommandType.C_ARITHMETIC },
+            { "skippable", CommandType.SKIPPABLE },
         };
 
         var operation = commandParsed[0];
@@ -81,7 +81,7 @@ public class Parser : Nand2TetrisParser
         return commandTypes[operation];
     }
 
-    public CommandType CommandType()
+    public CommandType GetCommandType()
     {
         return _commandType;
     }
@@ -101,7 +101,7 @@ public interface Nand2TetrisParser
 {
     bool HasMoreLines();
     void Advance();
-    CommandType CommandType();
+    CommandType GetCommandType();
     string Arg1();
     short Arg2();
 }

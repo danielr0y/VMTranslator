@@ -28,14 +28,14 @@ public class Translator
         {
             _parser.Advance();
 
-            switch (_parser.CommandType())
+            switch (_parser.GetCommandType())
             {
                 case CommandType.C_ARITHMETIC:
                     _writer.WriteArithmetic(_parser.Arg1());
                     break;
                 case CommandType.C_PUSH:
                 case CommandType.C_POP:
-                    _writer.WritePushPop(_parser.CommandType(), _parser.Arg1(), _parser.Arg2());
+                    _writer.WritePushPop(_parser.GetCommandType(), _parser.Arg1(), _parser.Arg2());
                     break;
                 case CommandType.C_FUNCTION:
                 case CommandType.C_CALL:
