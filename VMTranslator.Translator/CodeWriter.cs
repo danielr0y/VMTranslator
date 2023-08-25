@@ -356,6 +356,38 @@ public class CodeWriter : Nand2TetrisCodeWriter
         }
     }
 
+    public void WriteLabel(string label)
+    {
+        WriteLines(new string[]
+        {
+           $"// label {label}",
+           $"({label})"
+        });
+    }
+
+    public void WriteGoto(string label)
+    {
+        WriteLines(new string[]
+        {
+           $"// goto {label}",
+           $"    @{label}",
+            "    0;JMP",
+        });
+    }
+
+    public void WriteIf(string label)
+    {
+        WriteLines(new string[]
+        {
+            $"// if-goto {label}",
+            "    @SP",
+            "    AM=M-1",
+            "    D=M",
+           $"    @{label}",
+            "    D;JNE"
+        });
+    }
+
     private string GetSegmentAssemblySymbol(string segment)
     {
         return new Dictionary<string, string>()
@@ -399,5 +431,8 @@ public interface Nand2TetrisCodeWriter
 {
     void WriteArithmetic(string command);
     void WritePushPop(CommandType command, string segment, short index);
+    void WriteLabel(string label);
+    void WriteGoto(string label);
+    void WriteIf(string label);
     void Close();
 }

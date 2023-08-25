@@ -30,6 +30,15 @@ public class Translator
 
             switch (_parser.GetCommandType())
             {
+                case CommandType.C_LABEL:
+                    _writer.WriteLabel(_parser.Arg1());
+                    break;
+                case CommandType.C_GOTO:
+                    _writer.WriteGoto(_parser.Arg1());
+                    break;
+                case CommandType.C_IF:
+                    _writer.WriteIf(_parser.Arg1());
+                    break;
                 case CommandType.C_ARITHMETIC:
                     _writer.WriteArithmetic(_parser.Arg1());
                     break;

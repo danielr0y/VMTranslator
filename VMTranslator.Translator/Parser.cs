@@ -33,23 +33,27 @@ public class Parser : Nand2TetrisParser
 
         switch (_commandType)
         {
-            case CommandType.SKIPPABLE:
+            case CommandType.C_LABEL: // eg. label LABEL_NAME
+            case CommandType.C_GOTO: // eg. goto LABEL_NAME
+            case CommandType.C_IF: // eg. if-goto LABEL_NAME
             {
+                _arg1 = commandParsed[1];
                 break;
             }
-            case CommandType.C_ARITHMETIC:
+            case CommandType.C_ARITHMETIC: // eg. add
             {
                 _arg1 = commandParsed[0];
                 break;
             }
-            case CommandType.C_PUSH:
-            case CommandType.C_POP:
-            default:
+            case CommandType.C_PUSH: // eg. push constant 1
+            case CommandType.C_POP: // eg. pop local 0
             {
                 _arg1 = commandParsed[1];
                 _arg2 = Int16.Parse(commandParsed[2]);
                 break;
             }
+            case CommandType.SKIPPABLE:
+            default: break;
         }
     }
 
@@ -68,6 +72,9 @@ public class Parser : Nand2TetrisParser
             { "and", CommandType.C_ARITHMETIC },
             { "or", CommandType.C_ARITHMETIC },
             { "not", CommandType.C_ARITHMETIC },
+            { "label", CommandType.C_LABEL },
+            { "goto", CommandType.C_GOTO },
+            { "if-goto", CommandType.C_IF },
             { "skippable", CommandType.SKIPPABLE },
         };
 
