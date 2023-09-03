@@ -2,35 +2,71 @@
 
 try
 {
-    var fileNameArg = args[0];
-    var folderEndsAtIndex = fileNameArg.LastIndexOf('/');
-    var folder = fileNameArg[..folderEndsAtIndex];
-    var fileNameAndExtension = fileNameArg[(folderEndsAtIndex + 1)..];
-    var fileNameAndExtensionSplit = fileNameAndExtension.Split('.', 2);
-    var fileName = fileNameAndExtensionSplit[0];
-    var fileExtension = fileNameAndExtensionSplit[1];
+    /*
+     * load sources files
+     */
+    string source;
 
-    if ( !String.Equals(fileExtension, "vm") )
+    if (args.Length > 0)
     {
-        throw new Exception("Unsupported file type. Supply a .vm file.");
+        string sourceArg = args[0];
+        source = Path.GetFullPath(sourceArg);
+    }
+    else
+    {
+        source = Directory.GetCurrentDirectory();
     }
 
-    if ( !Char.IsUpper(fileName[0]) )
+    bool sourceIsFilePath = Path.HasExtension(source);
+
+    if ( !sourceIsFilePath && !Path.EndsInDirectorySeparator(source))
     {
-        throw new Exception("VM programs must start with an uppercase letter.");
+        source = $"{source}/";
     }
 
-    string outputFileName = $"{folder}/{fileName}.asm";
+    var sourceFolder = new DirectoryInfo(Path.GetDirectoryName(source) ??
+                                   throw new Exception("Could not determine directory from command arguments"));
 
-    using FileStream infs = new FileStream(fileNameArg, FileMode.Open, FileAccess.Read);
-    using StreamReader sr = new StreamReader(infs);
+    var files = from file in Directory.EnumerateFiles(sourceFolder.FullName, "*.vm", SearchOption.TopDirectoryOnly)
+        where !sourceIsFilePath || file == source // only include the one file if source is a file
+        where Char.IsUpper(Path.GetFileName(file)[0])
+        select file;
 
-    using FileStream outfs = File.Create(outputFileName);
-    using StreamWriter sw = new StreamWriter(outfs);
+    if (!files.Any())
+    {
+        throw new Exception("Folder contains no .vm files beginning with an uppercase letter.");
+    }
+
+
+    /*
+     * prepare the destination
+     */
+    var dest = Path.Combine(sourceFolder.FullName,
+        $"{(sourceIsFilePath ? Path.GetFileNameWithoutExtension(source) : sourceFolder.Name)}.asm");
+
+    // 'using' manages closing streams
+    using var outfs = File.Create(dest);
+    using var sw = new StreamWriter(outfs);
+
 
     var translator = new Translator(new Parser(), new CodeWriter());
 
-    translator.Translate(sr, sw, fileName);
+
+    /*
+     * do the translation
+     */
+    foreach (var file in files)
+    {
+        // 'using' managers closing streams
+        using var infs = new FileStream(file, FileMode.Open, FileAccess.Read);
+        using var sr = new StreamReader(infs);
+
+        translator.Translate(sr, Path.GetFileNameWithoutExtension(file));
+    }
+}
+catch (IndexOutOfRangeException)
+{
+    Console.WriteLine("use syntax: ConsoleInterface dirName");
 }
 catch (Exception e)
 {
