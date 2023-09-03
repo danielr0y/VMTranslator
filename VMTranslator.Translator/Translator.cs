@@ -19,10 +19,10 @@ public class Translator
      *  parse each line into its fields and the
      *  generate a sequence of assembly instructions from them
      */
-    public void Translate(StreamReader fsIn, StreamWriter fsOut, string fileName)
+    public void Translate(StreamReader fsIn, string fileName)
     {
         _parser.Init(fsIn);
-        _writer.Init(fsOut, fileName);
+        _writer.SetFileName(fileName);
 
         while (_parser.HasMoreLines())
         {
@@ -47,12 +47,15 @@ public class Translator
                     _writer.WritePushPop(_parser.GetCommandType(), _parser.Arg1(), _parser.Arg2());
                     break;
                 case CommandType.C_FUNCTION:
+                    _writer.WriteFunction(_parser.Arg1(), _parser.Arg2());
+                    break;
                 case CommandType.C_CALL:
+                    _writer.WriteCall(_parser.Arg1(), _parser.Arg2());
+                    break;
                 case CommandType.C_RETURN:
+                    _writer.WriteReturn();
                     break;
             }
         }
-
-        _writer.Close();
     }
 }

@@ -49,7 +49,11 @@ try
     using var sw = new StreamWriter(outfs);
 
 
-    var translator = new Translator(new Parser(), new CodeWriter());
+    /*
+     * create the translator
+     */
+    bool shouldBootstrap = !sourceIsFilePath;
+    var translator = new Translator(new Parser(), new CodeWriter(sw, shouldBootstrap));
 
 
     /*

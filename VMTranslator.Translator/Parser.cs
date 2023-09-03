@@ -31,30 +31,7 @@ public class Parser : Nand2TetrisParser
 
         _commandType = DetermineCommandType(commandParsed);
 
-        switch (_commandType)
-        {
-            case CommandType.C_LABEL: // eg. label LABEL_NAME
-            case CommandType.C_GOTO: // eg. goto LABEL_NAME
-            case CommandType.C_IF: // eg. if-goto LABEL_NAME
-            {
-                _arg1 = commandParsed[1];
-                break;
-            }
-            case CommandType.C_ARITHMETIC: // eg. add
-            {
-                _arg1 = commandParsed[0];
-                break;
-            }
-            case CommandType.C_PUSH: // eg. push constant 1
-            case CommandType.C_POP: // eg. pop local 0
-            {
-                _arg1 = commandParsed[1];
-                _arg2 = Int16.Parse(commandParsed[2]);
-                break;
-            }
-            case CommandType.SKIPPABLE:
-            default: break;
-        }
+        (_arg1, _arg2) = SetupArgs(_commandType, commandParsed);
     }
 
     private CommandType DetermineCommandType(string[] commandParsed)
@@ -75,6 +52,9 @@ public class Parser : Nand2TetrisParser
             { "label", CommandType.C_LABEL },
             { "goto", CommandType.C_GOTO },
             { "if-goto", CommandType.C_IF },
+            { "call", CommandType.C_CALL },
+            { "function", CommandType.C_FUNCTION },
+            { "return", CommandType.C_RETURN },
             { "skippable", CommandType.SKIPPABLE },
         };
 
@@ -86,6 +66,36 @@ public class Parser : Nand2TetrisParser
         }
 
         return commandTypes[operation];
+    }
+
+    private (string? _arg1, short _arg2) SetupArgs(CommandType commandType, string[] commandParsed)
+    {
+        switch (commandType)
+        {
+            case CommandType.C_ARITHMETIC: // eg. add
+            {
+                return (commandParsed[0], _arg2);
+            }
+            case CommandType.C_LABEL: // eg. label LABEL_NAME
+            case CommandType.C_GOTO: // eg. goto LABEL_NAME
+            case CommandType.C_IF: // eg. if-goto LABEL_NAME
+            {
+                return (commandParsed[1], _arg2);
+            }
+            case CommandType.C_PUSH: // eg. push constant 1
+            case CommandType.C_POP: // eg. pop local 0
+            case CommandType.C_CALL: // eg. call fName nArgs
+            case CommandType.C_FUNCTION: // eg. function fName nVars
+            {
+                return (commandParsed[1], Int16.Parse(commandParsed[2]));
+            }
+            case CommandType.C_RETURN:
+            case CommandType.SKIPPABLE:
+            default:
+            {
+                return (_arg1, _arg2);
+            }
+        }
     }
 
     public CommandType GetCommandType()
